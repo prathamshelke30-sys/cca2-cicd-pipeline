@@ -71,7 +71,7 @@ kubectl apply --validate=false -f k8s/service.yaml
         stage('Verification') {
             steps {
                 sh """
-                    kubectl rollout status deployment/cca2-app-deployment
+                    kubectl rollout status deployment/cca2-app
                     kubectl get pods -l app=cca2-app
                     kubectl get svc cca2-app-service
                 """
