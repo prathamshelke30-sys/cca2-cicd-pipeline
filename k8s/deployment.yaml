@@ -1,9 +1,7 @@
 apiVersion: apps/v1
 kind: Deployment
 metadata:
-  name: cca2-app-deployment
-  labels:
-    app: cca2-app
+  name: cca2-app
 spec:
   replicas: 1
   selector:
@@ -15,8 +13,7 @@ spec:
         app: cca2-app
     spec:
       containers:
-      - name: cca2-app-container
-        image: prathamshelke331/
-        cca2-cicd-pipeline:latest
-        ports:
-        - containerPort: 3000
+        - name: cca2-app
+          image: DOCKER_IMAGE_NAME
+          ports:
+            - containerPort: 3000
