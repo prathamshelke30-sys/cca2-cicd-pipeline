@@ -41,14 +41,31 @@ echo 'Application file check passed!'
         }
 
         stage('Minikube Deployment') {
-            steps {
-                sh """
-                    sed -i 's|DOCKER_IMAGE_NAME|${DOCKERHUB_USER}/${IMAGE_NAME}:${IMAGE_TAG}|g' k8s/deployment.yaml
-                    kubectl apply -f k8s/deployment.yaml
-                    kubectl apply -f k8s/service.yaml
-                """
+    steps {
+        sh """
+            echo "Checking workspace..."
+            pwd
+            ls -la
+            ls -la k8s || true
+
+            test -f k8s/deployment.yaml || {
+                echo "ERROR: k8s/deployment.yaml not found"
+                find . -maxdepth 5 -type f -name '*.yaml'
+                exit 1
             }
-        }
+
+            test -f k8s/service.yaml || {
+                echo "ERROR: k8s/service.yaml not found"
+                exit 1
+            }
+
+            sed -i 's|DOCKER_IMAGE_NAME|${DOCKERHUB_USER}/${IMAGE_NAME}:${IMAGE_TAG}|g' k8s/deployment.yaml
+
+            kubectl apply -f k8s/deployment.yaml
+            kubectl apply -f k8s/service.yaml
+        """
+    }
+}
 
         stage('Verification') {
             steps {
