@@ -16,6 +16,7 @@ spec:
     spec:
       containers:
       - name: cca2-app-container
-        image: DOCKER_IMAGE_NAME
+        image: prathamshelke331/
+        cca2-cicd-pipeline:latest
         ports:
         - containerPort: 3000
