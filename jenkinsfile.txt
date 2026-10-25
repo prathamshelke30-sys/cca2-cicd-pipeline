@@ -1,0 +1,62 @@
+pipeline {
+    agent any
+
+    environment {
+        DOCKERHUB_CRED = 'dockerhub-credentials'
+        DOCKERHUB_USER = 'prathamshelke331'
+        IMAGE_NAME     = 'cca2-app'
+        IMAGE_TAG      = "${BUILD_NUMBER}"
+    }
+
+    stages {
+        stage('Checkout') {
+            steps {
+                checkout scm
+            }
+        }
+
+        stage('Build and Test') {
+            steps {
+                echo 'Running syntax validation check...'
+                sh 'python3 -m py_compile app.py'
+            }
+        }
+
+        stage('Docker Build') {
+            steps {
+                sh "docker build -t ${DOCKERHUB_USER}/${IMAGE_NAME}:${IMAGE_TAG} ."
+                sh "docker tag ${DOCKERHUB_USER}/${IMAGE_NAME}:${IMAGE_TAG} ${DOCKERHUB_USER}/${IMAGE_NAME}:latest"
+            }
+        }
+
+        stage('Push Image') {
+            steps {
+                withCredentials([usernamePassword(credentialsId: "${DOCKERHUB_CRED}", passwordVariable: 'DOCKER_PASS', usernameVariable: 'DOCKER_USER')]) {
+                    sh "echo \${DOCKER_PASS} | docker login -u \${DOCKER_USER} --password-stdin"
+                    sh "docker push ${DOCKERHUB_USER}/${IMAGE_NAME}:${IMAGE_TAG}"
+                    sh "docker push ${DOCKERHUB_USER}/${IMAGE_NAME}:latest"
+                }
+            }
+        }
+
+        stage('Minikube Deployment') {
+            steps {
+                sh """
+                    sed -i 's|DOCKER_IMAGE_NAME|${DOCKERHUB_USER}/${IMAGE_NAME}:${IMAGE_TAG}|g' k8s/deployment.yaml
+                    kubectl apply -f k8s/deployment.yaml
+                    kubectl apply -f k8s/service.yaml
+                """
+            }
+        }
+
+        stage('Verification') {
+            steps {
+                sh """
+                    kubectl rollout status deployment/cca2-app-deployment
+                    kubectl get pods -l app=cca2-app
+                    kubectl get svc cca2-app-service
+                """
+            }
+        }
+    }
+}
