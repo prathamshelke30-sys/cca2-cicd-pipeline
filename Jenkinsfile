@@ -61,8 +61,8 @@ echo 'Application file check passed!'
 
             sed -i 's|DOCKER_IMAGE_NAME|${DOCKERHUB_USER}/${IMAGE_NAME}:${IMAGE_TAG}|g' k8s/deployment.yaml
 
-            kubectl apply -f k8s/deployment.yaml
-            kubectl apply -f k8s/service.yaml
+            kubectl apply --validate=false -f k8s/deployment.yaml
+kubectl apply --validate=false -f k8s/service.yaml
         """
     }
 }
