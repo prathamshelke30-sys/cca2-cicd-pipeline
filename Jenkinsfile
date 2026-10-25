@@ -5,7 +5,8 @@ pipeline {
         DOCKERHUB_CRED = 'dockerhub-credentials'
         DOCKERHUB_USER = 'prathamshelke331'
         IMAGE_NAME     = 'cca2-app'
-        IMAGE_TAG      = "${BUILD_NUMBER}"
+        IMAGE_TAG      = "${BUILD_NUMBER}" 
+        KUBECONFIG     = '/var/jenkins_home/.kube/config'
     }
 
     stages {
